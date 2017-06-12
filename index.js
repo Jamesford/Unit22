@@ -2,7 +2,7 @@ const Discord = require('discord.js')
 const config = require('./config.json')
 const playMusic = require('./lib/play')
 const stopMusic = require('./lib/stop')
-const changeVolume = require('./lib/volume')
+const volumeCtrl = require('./lib/volume')
 
 // Setup
 const client = new Discord.Client()
@@ -42,9 +42,15 @@ client.on('message', message => {
     playMusic(message, url)
   }
 
-  if (/^!volume (\d|10)$/i.test(message.content)) {
-    const volume = message.content.match(/^!volume (\d|10)$/i)[1] / 10
-    changeVolume(message, volume)
+  if (/^!volume( (\d|10))?$/i.test(message.content)) {
+    const integer = message.content.match(/^!volume( (\d|10))?$/i)[1]
+
+    if (integer === undefined) {
+      volumeCtrl.get(message)
+    } else {
+      const volume = integer / 10
+      volumeCtrl.set(message, volume)
+    }
   }
 })
 
