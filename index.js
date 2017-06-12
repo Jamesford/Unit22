@@ -1,11 +1,11 @@
 const Discord = require('discord.js')
+const config = require('./config.json')
 const playMusic = require('./lib/play')
 const stopMusic = require('./lib/stop')
 const changeVolume = require('./lib/volume')
 
 // Setup
 const client = new Discord.Client()
-const bot_token = '<your bot token>'
 
 // Bot is running
 client.on('ready', () => {
@@ -49,4 +49,4 @@ client.on('message', message => {
 })
 
 // Conenct/Login
-client.login(bot_token)
+client.login(config.bot_token)
