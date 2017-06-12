@@ -1,5 +1,6 @@
 const Discord = require('discord.js')
 const config = require('./config.json')
+const help = require('./lib/help')
 const playMusic = require('./lib/play')
 const stopMusic = require('./lib/stop')
 const volumeCtrl = require('./lib/volume')
@@ -10,16 +11,17 @@ const client = new Discord.Client()
 // Bot is running
 client.on('ready', () => {
   console.log('Unit22 Online')
+  client.user.setGame('!help for commands')
 })
 
 // Listen for messages
 client.on('message', message => {
-  if (message.content === '!ping') {
-    message.channel.send('pong :ping_pong:')
+  if (message.content === '!help') {
+    help(message, client)
   }
 
-  if (message.content === '!log') {
-    console.log(message)
+  if (message.content === '!ping') {
+    message.channel.send('pong :ping_pong:')
   }
 
   if (message.content === '!where') {
