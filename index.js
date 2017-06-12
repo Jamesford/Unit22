@@ -2,8 +2,8 @@ const Discord = require('discord.js')
 const config = require('./config.json')
 const help = require('./lib/help')
 const playMusic = require('./lib/play')
-const stopMusic = require('./lib/stop')
 const volumeCtrl = require('./lib/volume')
+const playbackCtrl = require('./lib/playback')
 
 // Setup
 const client = new Discord.Client()
@@ -35,8 +35,16 @@ client.on('message', message => {
     return message.channel.send(`You're in ${usersVoiceChannel.name} on ${message.member.guild.name}`)
   }
 
+  if (message.content === '!pause') {
+    playbackCtrl.pause(message)
+  }
+
+  if (message.content === '!resume' || message.content === '!play') {
+    playbackCtrl.resume(message)
+  }
+
   if (message.content === '!stop') {
-    stopMusic(message)
+    playbackCtrl.stop(message)
   }
 
   if (/^!play (\S+)$/i.test(message.content)) {
