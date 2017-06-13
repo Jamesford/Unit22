@@ -5,6 +5,9 @@ const playMusic = require('./lib/play')
 const volumeCtrl = require('./lib/volume')
 const playbackCtrl = require('./lib/playback')
 
+// Plugins
+const steam_common_games = require('./plugins/steam_common_games')
+
 // Setup
 const client = new Discord.Client()
 
@@ -61,6 +64,12 @@ client.on('message', message => {
       const volume = integer / 10
       volumeCtrl.set(message, volume)
     }
+  }
+
+  // Plugins
+
+  if (message.content === '!steam') {
+    steam_common_games(message, client)
   }
 })
 
