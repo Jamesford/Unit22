@@ -44,7 +44,6 @@ module.exports = async (config, client) => {
   const bot = new Bot
 
   plugin_files
-    // .filter(f => f !== 'steam_common_games.js')
     .forEach(file => {
       const plugin = require(`./plugins/${file}`)
       plugin(bot, config, client)

@@ -104,6 +104,6 @@ module.exports = (bot, config, client) => {
         return message.channel.send(text)
       })
     })
-    .usage('!steam')
-    .define(`list steam games in common for players`)
+    .usage('!steam <comma-separated steam usernames>')
+    .define(`list steam games in common for the given users`)
 }
