@@ -47,8 +47,9 @@ module.exports = (bot, config, client) => {
   }
 
   bot
-    .command(/^!steam$/i, async (message, match) => {
-      const steamNames = ['SpoonooqZ', 'VageSky', 'smazatak'] // ninjahh-93
+    .command(/^!(st|steam) ((.*)+,(.*)+[^,])$/i, async (message, match) => {
+      const users = match[2]
+      const steamNames = match[2].split(',')
 
       let steamIds
       try {
