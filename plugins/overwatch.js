@@ -36,29 +36,34 @@ function statsFromMostPlayedRegion (stats) {
 }
 
 module.exports = (bot, config, client) => {
-
   bot.command(/^!(ow|overwatch) ([^0-9\s](\S{2,11})#(\d{4}))( (eu|us|kr))?$/i, async (message, match) => {
-      const battletag = match[2]
-      const givenRegion = match[6]
+    const battletag = match[2]
+    const givenRegion = match[6]
 
-      let stats
-      try {
-        stats = await getStats(battletag)
-      } catch (error) {
-        console.error(error)
-        return message.channel.send(`Couldn't get stats for that battletag`)
-      }
+    let stats
+    try {
+      stats = await getStats(battletag)
+    } catch (error) {
+      console.error(error)
+      return message.channel.send(`Couldn't get stats for that battletag`)
+    }
 
-      if (givenRegion && !stats[givenRegion]) return message.channel.send(`No stats found for that battletag in the ${givenRegion} region`)
+    if (givenRegion && !stats[givenRegion]) return message.channel.send(`No stats found for that battletag in the ${givenRegion} region`)
 
-      let regionStats = givenRegion ? stats[givenRegion].stats : statsFromMostPlayedRegion(stats)
+    let regionStats = givenRegion ? stats[givenRegion].stats : statsFromMostPlayedRegion(stats)
 
-      if (!regionStats) return message.channel.send('No stats found for that battletag')
+    if (!regionStats) return message.channel.send(`No stats found for that battletag`)
 
-      console.log('regionStats', regionStats)
+    console.log(`regionStats`, regionStats)
 
-      return message.channel.send(`Found`)
-    })
-    .usage('!ow <battletag> [region (us, eu, kr)]')
-    .define(`displays player statistics for the given battletag`)
+    return message.channel.send(`Found`)
+  })
+  .usage(`!ow <battletag> [region (us, eu, kr)]`)
+  .define(`displays competitive statistics for the given battletag`)
+
+  bot.command(/^!(ow|overwatch) qp ([^0-9\s](\S{2,11})#(\d{4}))( (eu|us|kr))?$/i, async (message, match) => {
+    return message.channel.send(`WIP`)
+  })
+  .usage(`!ow qp <battletag> [region (us, eu, kr)]`)
+  .define(`displays quickplay statistics for the given battletag`)
 }
