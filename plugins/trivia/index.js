@@ -105,4 +105,14 @@ module.exports = (bot, config, client) => {
   })
   .usage('!trivia scores')
   .define('show the scores for the current trivia game')
+
+  bot.command(/^!trivia question$/i, message => {
+    if (!games[message.channel.id]) return message.channel.send('No trivia game is in progress')
+
+    const { currentQuestion } = games[message.channel.id]
+
+    return message.channel.send(`\`\`\`${currentQuestion.question}\`\`\``)
+  })
+  .usage('!trivia question')
+  .define('repeat the current question')
 }
