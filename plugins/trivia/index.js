@@ -34,7 +34,7 @@ const startGame = function (channelId, questionSet, pointsToWin) {
 let games = {}
 
 module.exports = (bot, config, client) => {
-  bot.command(/^!trivia$/i, (message, match) => {
+  bot.command(/^!trivia start$/i, (message, match) => {
     if (games[message.channel.id]) return message.channel.send('Trivia game already in progress')
 
     games[message.channel.id] = startGame(message.channel.id, default_trivia, 2)
@@ -47,7 +47,7 @@ module.exports = (bot, config, client) => {
       message.channel.send(`\`\`\`${game.currentQuestion.question}\`\`\``)
     }, 1000)
   })
-  .usage('!trivia')
+  .usage('!trivia start')
   .define('starts a trivia game')
 
   bot.command(/^!(ans|answer) (.*)$/i, (message, match) => {
@@ -68,7 +68,7 @@ module.exports = (bot, config, client) => {
     if (game.questionPool.length === 0) {
       return setTimeout(() => {
         message.channel.send(`${message.author.username} wins`)
-        delete game[message.channel.id]
+        delete games[message.channel.id]
       }, 1000)
     }
 
@@ -76,7 +76,7 @@ module.exports = (bot, config, client) => {
     if (game.pointsToWin && game.points[message.author.username] === game.pointsToWin) {
       return setTimeout(() => {
         message.channel.send(`${message.author.username} wins`)
-        delete game[message.channel.id]
+        delete games[message.channel.id]
       }, 1000)
     }
 
@@ -88,4 +88,21 @@ module.exports = (bot, config, client) => {
   })
   .usage('!ans <your answer>')
   .define('attempt to answer the trivia question')
+
+  bot.command(/^!trivia scores$/i, message => {
+    if (!games[message.channel.id]) return message.channel.send('No trivia game is in progress')
+
+    const { points, pointsToWin } = games[message.channel.id]
+
+    var scores = Object.keys(points).map(user => ({ user: user, value: points[user] })).sort((a, b) => a.value < b.value)
+    var s = 'Current Trivia Scores\n```Score - Player Name\n\n'
+    scores.forEach(score => {
+      s += `${score.value} - ${score.user}\n\n`
+    })
+    s += '```'
+    if (pointsToWin) s += `\nPoints to win: ${pointsToWin}`
+    return message.channel.send(s)
+  })
+  .usage('!trivia scores')
+  .define('show the scores for the current trivia game')
 }
