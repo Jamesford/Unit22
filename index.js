@@ -1,18 +1,18 @@
 const Discord = require('discord.js')
 const config = require('./config.json')
-const loadPlugins = require('./plugin_loader')
+const initialise = require('./lib/initialise')
 
 // Built-ins
-const help = require('./lib/help')
-const plugins = require('./lib/plugins')
-const playMusic = require('./lib/play')
-const volumeCtrl = require('./lib/volume')
-const playbackCtrl = require('./lib/playback')
+const help = require('./lib/commands/help')
+const plugins = require('./lib/commands/plugins')
+const playMusic = require('./lib/commands/play')
+const volumeCtrl = require('./lib/commands/volume')
+const playbackCtrl = require('./lib/commands/playback')
 
 // Setup
 const client = new Discord.Client()
 
-loadPlugins(config, client)
+initialise(config, client)
 .then(bot => {
   // Bot is running
   client.on('ready', () => {
