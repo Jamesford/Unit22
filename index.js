@@ -8,6 +8,7 @@ const plugins = require('./lib/commands/plugins')
 const playMusic = require('./lib/commands/play')
 const volumeCtrl = require('./lib/commands/volume')
 const playbackCtrl = require('./lib/commands/playback')
+const queueCtrl = require('./lib/commands/queue')
 
 // Setup
 const client = new Discord.Client()
@@ -23,15 +24,15 @@ initialise(config, client)
   // Listen for messages
   client.on('message', message => {
     if (message.content === '!help') {
-      help(message, client)
+      return help(message, client)
     }
 
     if (message.content === '!plugins') {
-      plugins(message, client, bot._commands)
+      return plugins(message, client, bot._commands)
     }
 
     if (message.content === '!ping') {
-      message.channel.send('pong :ping_pong:')
+      return message.channel.send('pong :ping_pong:')
     }
 
     if (message.content === '!where') {
@@ -46,32 +47,47 @@ initialise(config, client)
     }
 
     if (message.content === '!pause') {
-      playbackCtrl.pause(message)
+      return playbackCtrl.pause(message)
     }
 
     if (message.content === '!resume' || message.content === '!play') {
-      playbackCtrl.resume(message)
+      return playbackCtrl.resume(message)
     }
 
     if (message.content === '!stop') {
-      playbackCtrl.stop(message)
+      return playbackCtrl.stop(message)
     }
 
     if (/^!play (\S+)$/i.test(message.content)) {
       const url = message.content.match(/^!play (\S+)$/i)[1]
-      playMusic(message, url)
+      return playMusic(message, url)
     }
 
     if (/^!volume( (\d|10))?$/i.test(message.content)) {
       const integer = message.content.match(/^!volume( (\d|10))?$/i)[1]
 
       if (integer === undefined) {
-        volumeCtrl.get(message)
+        return volumeCtrl.get(message)
       } else {
         const volume = integer / 10
-        volumeCtrl.set(message, volume)
+        return volumeCtrl.set(message, volume)
       }
     }
+
+    if (message.content === '!queue list' || message.content === '!q list') {
+      return queueCtrl.list(message)
+    }
+
+    if (/^!(queue|q) remove (\d+)$/i.test(message.content)) {
+      const int = parseInt(message.content.match(/^!(queue|q) remove (\d+)$/i)[2])
+      return queueCtrl.remove(message, int)
+    }
+
+    if (/^!(queue|q) (\S+)$/i.test(message.content)) {
+      const url = message.content.match(/^!(queue|q) (\S+)$/i)[2]
+      return queueCtrl.add(message, url)
+    }
+
 
     // Test plugin commands & execute if match
     bot._commands.forEach(command => {
