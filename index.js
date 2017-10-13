@@ -10,6 +10,8 @@ const volumeCtrl = require('./lib/commands/volume')
 const playbackCtrl = require('./lib/commands/playback')
 const queueCtrl = require('./lib/commands/queue')
 
+const Players = require('./lib/commands/music/Players')
+
 // Setup
 const client = new Discord.Client()
 
@@ -22,7 +24,41 @@ initialise(config, client)
   })
 
   // Listen for messages
-  client.on('message', message => {
+  client.on('message', async (message) => {
+    if (/^!test (\S+)$/i.test(message.content)) {
+      const url = message.content.match(/^!test (\S+)$/i)[1]
+
+      try {
+        const { channels, id } = message.member.guild
+        const voiceChannel = channels.get(message.member.voiceChannelID)
+        const textChannel = message.channel
+
+        const player = Players.getPlayer(id)
+        await player.joinRoom(voiceChannel, textChannel)
+        await player.playTrack(url)
+      } catch (err) {
+        console.error(err)
+        return message.channel.send(`Couldn't play that track. :confounded:`)
+      }
+    }
+
+    if (/^!change (\S+)$/i.test(message.content)) {
+      const url = message.content.match(/^!change (\S+)$/i)[1]
+
+      try {
+        const { channels, id } = message.member.guild
+        // const voiceChannel = channels.get(message.member.voiceChannelID)
+        // const textChannel = message.channel
+
+        const player = Players.getPlayer(id)
+        // await player.joinRoom(voiceChannel, textChannel)
+        await player.changeTrack(url)
+      } catch (err) {
+        console.error(err)
+        return message.channel.send(`Couldn't play that track. :confounded:`)
+      }
+    }
+
     if (message.content === '!help') {
       return help(message, client)
     }
