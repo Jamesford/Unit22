@@ -4,7 +4,7 @@
 
  - You will need build tools installed on your machine in order to compile the dependencies
 	 - macOS `xcode-select --install`
-	 - Ubuntu `sudo apt-get install build-essential`
+	 - Ubuntu `sudo apt-get install build-essential libtool autoconf`
 	 - CentOS `yum install gcc gcc-c++ make openssl-devel`
 
  - `npm install`
