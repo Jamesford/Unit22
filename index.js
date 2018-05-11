@@ -2,17 +2,10 @@ const Discord = require('discord.js')
 const config = require('./config.json')
 const initialise = require('./lib/initialise')
 
-// Built-ins
+// Commands
 const help = require('./lib/commands/help')
 const plugins = require('./lib/commands/plugins')
-
-// Old music modules
-// const playMusic = require('./lib/commands/play')
-// const volumeCtrl = require('./lib/commands/volume')
-// const playbackCtrl = require('./lib/commands/playback')
-// const queueCtrl = require('./lib/commands/queue')
-
-const musicCommands = require('./lib/commands/music/commands')
+const musicCommands = require('./lib/commands/music')
 
 // Setup
 const client = new Discord.Client()
@@ -27,13 +20,14 @@ initialise(config, client)
 
   // Listen for messages
   client.on('message', async (message) => {
-    if (message.content[0] !== '!') return false
+    // Check if message is a command, if not ignore it
+    if (message.content[0] !== '!') return null
 
     console.log(`Command: ${message.content}`)
 
     const executedFunction = await musicCommands(message)
     // Do not execute other commands if music command was executed
-    if (executedFunction) return false
+    if (executedFunction) return null
 
     if (message.content === '!help') {
       return help(message, client)
@@ -45,17 +39,6 @@ initialise(config, client)
 
     if (message.content === '!ping') {
       return message.channel.send('pong :ping_pong:')
-    }
-
-    if (message.content === '!where') {
-      const usersVoiceChannelID = message.member.voiceChannelID
-
-      // Not in voice
-      if (!usersVoiceChannelID) return message.channel.send('Looks like you aren\'t in a voice channel :exclamation:')
-
-      // Tell 'em
-      const usersVoiceChannel = message.member.guild.channels.get(usersVoiceChannelID)
-      return message.channel.send(`You're in ${usersVoiceChannel.name} on ${message.member.guild.name}`)
     }
 
     // Test plugin commands & execute if match
