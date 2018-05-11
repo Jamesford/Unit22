@@ -2,13 +2,10 @@ const Discord = require('discord.js')
 const config = require('./config.json')
 const initialise = require('./lib/initialise')
 
-// Built-ins
+// Commands
 const help = require('./lib/commands/help')
 const plugins = require('./lib/commands/plugins')
-const playMusic = require('./lib/commands/play')
-const volumeCtrl = require('./lib/commands/volume')
-const playbackCtrl = require('./lib/commands/playback')
-const queueCtrl = require('./lib/commands/queue')
+const musicCommands = require('./lib/commands/music')
 
 // Setup
 const client = new Discord.Client()
@@ -18,11 +15,20 @@ initialise(config, client)
   // Bot is running
   client.on('ready', () => {
     console.log('Unit22 Online')
-    client.user.setGame('!help for commands')
+    client.user.setActivity('!help for commands')
   })
 
   // Listen for messages
-  client.on('message', message => {
+  client.on('message', async (message) => {
+    // Check if message is a command, if not ignore it
+    if (message.content[0] !== '!') return null
+
+    console.log(`Command: ${message.content}`)
+
+    const executedFunction = await musicCommands(message)
+    // Do not execute other commands if music command was executed
+    if (executedFunction) return null
+
     if (message.content === '!help') {
       return help(message, client)
     }
@@ -34,60 +40,6 @@ initialise(config, client)
     if (message.content === '!ping') {
       return message.channel.send('pong :ping_pong:')
     }
-
-    if (message.content === '!where') {
-      const usersVoiceChannelID = message.member.voiceChannelID
-
-      // Not in voice
-      if (!usersVoiceChannelID) return message.channel.send('Looks like you aren\'t in a voice channel :exclamation:')
-
-      // Tell 'em
-      const usersVoiceChannel = message.member.guild.channels.get(usersVoiceChannelID)
-      return message.channel.send(`You're in ${usersVoiceChannel.name} on ${message.member.guild.name}`)
-    }
-
-    if (message.content === '!pause') {
-      return playbackCtrl.pause(message)
-    }
-
-    if (message.content === '!resume' || message.content === '!play') {
-      return playbackCtrl.resume(message)
-    }
-
-    if (message.content === '!stop') {
-      return playbackCtrl.stop(message)
-    }
-
-    if (/^!play (\S+)$/i.test(message.content)) {
-      const url = message.content.match(/^!play (\S+)$/i)[1]
-      return playMusic(message, url)
-    }
-
-    if (/^!volume( (\d|10))?$/i.test(message.content)) {
-      const integer = message.content.match(/^!volume( (\d|10))?$/i)[1]
-
-      if (integer === undefined) {
-        return volumeCtrl.get(message)
-      } else {
-        const volume = integer / 10
-        return volumeCtrl.set(message, volume)
-      }
-    }
-
-    if (message.content === '!queue list' || message.content === '!q list') {
-      return queueCtrl.list(message)
-    }
-
-    if (/^!(queue|q) remove (\d+)$/i.test(message.content)) {
-      const int = parseInt(message.content.match(/^!(queue|q) remove (\d+)$/i)[2])
-      return queueCtrl.remove(message, int)
-    }
-
-    if (/^!(queue|q) (\S+)$/i.test(message.content)) {
-      const url = message.content.match(/^!(queue|q) (\S+)$/i)[2]
-      return queueCtrl.add(message, url)
-    }
-
 
     // Test plugin commands & execute if match
     bot._commands.forEach(command => {
