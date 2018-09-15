@@ -48,7 +48,7 @@ initialise(config, client)
         // Get match values
         const match = message.content.match(command.regex)
         // Execute command
-        command.func(message, match)
+        command.function(message, match)
       }
     })
   })
