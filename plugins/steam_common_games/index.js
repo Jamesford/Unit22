@@ -1,53 +1,56 @@
 const request = require('request')
 const _ = require('lodash')
 
+function getSteamID (username) {
+  return new Promise((resolve, reject) => {
+    const url = `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${config.steam_key}&vanityurl=${username}&format=json`
+    return request(url, (err, _, body) => {
+      if (err) return reject(err)
+      const json = JSON.parse(body)
+      if (!json.response || !json.response.steamid) return reject({ message: 'NO-ID', username: username })
+      return resolve(json.response.steamid)
+    })
+  })
+}
+
+function getOwnedGames (id) {
+  return new Promise((resolve, reject) => {
+    const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.steam_key}&steamid=${id}&format=json`
+    return request(url, (err, _, body) => {
+      if (err) return reject(err)
+      // Format to array of steam appid's [10, 20, 30, 40, 50, ...]
+      return resolve(JSON.parse(body).response.games.map(g => g.appid))
+    })
+  })
+}
+
+function getGameInfo (id) {
+  return new Promise((resolve, reject) => {
+    // Official API
+    // const url = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${config.steam_key}&appid=${id}&format=json`
+    // Unlisted API
+    const url = `https://store.steampowered.com/api/appdetails/?appids=${id}`
+    return request(url, (err, _, body) => {
+      if (err) return reject(err)
+      // Format to array of steam appid's [10, 20, 30, 40, 50, ...]
+      const json = JSON.parse(body)
+      if (!json[id].success) return resolve(null)
+      const data = json[id].data
+      return resolve({
+        type: data.type,
+        name: data.name,
+        developer: data.developers[0],
+      })
+    })
+  })
+}
+
 module.exports = (bot, config, client) => {
-  function getSteamID (username) {
-    return new Promise((resolve, reject) => {
-      const url = `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${config.steam_key}&vanityurl=${username}&format=json`
-      return request(url, (err, _, body) => {
-        if (err) return reject(err)
-        const json = JSON.parse(body)
-        if (!json.response || !json.response.steamid) return reject({ message: 'NO-ID', username: username })
-        return resolve(json.response.steamid)
-      })
-    })
-  }
-
-  function getOwnedGames (id) {
-    return new Promise((resolve, reject) => {
-      const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.steam_key}&steamid=${id}&format=json`
-      return request(url, (err, _, body) => {
-        if (err) return reject(err)
-        // Format to array of steam appid's [10, 20, 30, 40, 50, ...]
-        return resolve(JSON.parse(body).response.games.map(g => g.appid))
-      })
-    })
-  }
-
-  function getGameInfo (id) {
-    return new Promise((resolve, reject) => {
-      // Official API
-      // const url = `https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=${config.steam_key}&appid=${id}&format=json`
-      // Unlisted API
-      const url = `https://store.steampowered.com/api/appdetails/?appids=${id}`
-      return request(url, (err, _, body) => {
-        if (err) return reject(err)
-        // Format to array of steam appid's [10, 20, 30, 40, 50, ...]
-        const json = JSON.parse(body)
-        if (!json[id].success) return resolve(null)
-        const data = json[id].data
-        return resolve({
-          type: data.type,
-          name: data.name,
-          developer: data.developers[0],
-        })
-      })
-    })
-  }
-
-  bot
-    .command(/^!(st|steam) ((.*)+,(.*)+[^,])$/i, async (message, match) => {
+  bot.command({
+    regex: /^!(st|steam) ((.*)+,(.*)+[^,])$/i,
+    usage: '!steam <comma-separated steam usernames>',
+    description: 'list steam games in common for the given users',
+    function: async (message, match) => {
       const users = match[2]
       const steamNames = match[2].split(',')
 
@@ -104,7 +107,6 @@ module.exports = (bot, config, client) => {
       return response.forEach(text => {
         return message.channel.send(text)
       })
-    })
-    .usage('!steam <comma-separated steam usernames>')
-    .define(`list steam games in common for the given users`)
+    }
+  })
 }
